@@ -2,5 +2,5 @@ workspace.code-workspace
 *sqlite3
 *.pyc
 __pycache__
-env.py
+.env
 .vscode/*
