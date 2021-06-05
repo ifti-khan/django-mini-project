@@ -36,11 +36,10 @@ else:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = dev_env
 
-if 'HEROKU_HOSTNAME' in os.environ:
-    ALLOWED_HOSTS = [os.environ.get('HEROKU_HOSTNAME')]
-else:
+if dev_env:
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-
+else:
+    ALLOWED_HOSTS = ['iftikhan-django-mini-project.herokuapp.com']
 
 # Application definition
 
