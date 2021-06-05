@@ -36,10 +36,10 @@ else:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = dev_env
 
-if dev_env:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-else:
+if 'HEROKU_HOSTNAME' in os.environ:
     ALLOWED_HOSTS = [os.environ.get('HEROKU_HOSTNAME')]
+else:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
