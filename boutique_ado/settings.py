@@ -9,17 +9,16 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
+
 import os
 import dj_database_url
 from pathlib import Path
 
 import environ
 
-env = environ.Env()
+getenv = environ.Env()
 # reading .env file
 environ.Env.read_env()
-
-dev_env = env("DEVELOPMENT")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,15 +30,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 if 'SECRET_KEY' in os.environ:
     SECRET_KEY = os.getenv("SECRET_KEY")
 else:
-    SECRET_KEY = env("SECRET_KEY")
+    SECRET_KEY = getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = dev_env
-
-if dev_env:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+if 'DEVELOPMENT' in os.environ:
+    DEBUG = False
 else:
+    DEBUG = True
+
+if 'HEROKU_HOSTNAME' in os.environ:
     ALLOWED_HOSTS = ['iftikhan-django-mini-project.herokuapp.com']
+else:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Application definition
 
@@ -134,16 +136,16 @@ WSGI_APPLICATION = 'boutique_ado.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-if dev_env:
+if 'DATABASE_URL' in os.environ:
+    DATABASES = {
+        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+    }
+else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         }
-    }
-else:
-    DATABASES = {
-        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
     }
 
 
@@ -183,12 +185,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-if dev_env:
-    STATIC_URL = '/static/'
-    STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+STATIC_URL = '/static/'
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 if 'USE_AWS' in os.environ:
     # Cache control
@@ -222,22 +223,19 @@ STRIPE_CURRENCY = 'usd'
 if 'STRIPE_PUBLIC_KEY' in os.environ:
     STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY", '')
 else:
-    STRIPE_PUBLIC_KEY = env("STRIPE_PUBLIC_KEY")
+    STRIPE_PUBLIC_KEY = getenv("STRIPE_PUBLIC_KEY")
 
 if 'STRIPE_SECRET_KEY' in os.environ:
     STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", '')
 else:
-    STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
+    STRIPE_SECRET_KEY = getenv("STRIPE_SECRET_KEY")
 
 if 'STRIPE_WH_SECRET' in os.environ:
     STRIPE_WH_SECRET = os.getenv("STRIPE_WH_SECRET", '')
 else:
-    STRIPE_WH_SECRET = env("STRIPE_WH_SECRET")
+    STRIPE_WH_SECRET = getenv("STRIPE_WH_SECRET")
 
-if dev_env:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-    DEFAULT_FROM_EMAIL = 'boutiqueado@example.com'
-else:
+if 'EMAIL_HOST_USER' in os.environ:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_USE_TLS = True
     EMAIL_PORT = 587
@@ -245,6 +243,9 @@ else:
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASS')
     DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_HOST_USER')
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEFAULT_FROM_EMAIL = 'boutiqueado@example.com'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
